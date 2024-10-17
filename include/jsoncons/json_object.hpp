@@ -347,7 +347,6 @@ namespace jsoncons {
 
         sorted_json_object& operator=(const sorted_json_object& other)
         {
-            allocator_holder<allocator_type>::operator=(other.get_allocator());
             members_ = other.members_;
             return *this;
         }
@@ -1133,7 +1132,6 @@ namespace jsoncons {
 
         order_preserving_json_object& operator=(const order_preserving_json_object& val)
         {
-            allocator_holder<allocator_type>::operator=(val.get_allocator());
             members_ = val.members_;
             return *this;
         }

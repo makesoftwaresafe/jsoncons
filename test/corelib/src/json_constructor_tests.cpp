@@ -15,11 +15,6 @@ using namespace jsoncons;
 
 #if defined(JSONCONS_HAS_POLYMORPHIC_ALLOCATOR) && JSONCONS_HAS_POLYMORPHIC_ALLOCATOR == 1
 #include <memory_resource> 
-using namespace jsoncons;
-
-using pmr_json = jsoncons::pmr::json;
-using pmr_ojson = jsoncons::pmr::ojson;
-
 
 TEST_CASE("json constructor with pmr allocator")
 {
@@ -33,188 +28,208 @@ TEST_CASE("json constructor with pmr allocator")
     std::pmr::monotonic_buffer_resource pool2{ std::data(buffer2), std::size(buffer2) };
     std::pmr::polymorphic_allocator<char> alloc2(&pool2);
 
-    const char* long_key = "Key too long for short string";
-    const char* long_key_end = long_key + strlen(long_key);
-    const char* long_string = "String too long for short string";
-    const char* long_string_end = long_string + strlen(long_string);
-    const char* another_long_string = "Another string too long for short string";
-    const char* another_long_string_end = another_long_string + strlen(another_long_string);
+    const char* long_key1 = "Key too long for short string";
+    const char* long_key1_end = long_key1 + strlen(long_key1);
+    const char* long_string1 = "String too long for short string";
+    const char* long_string1_end = long_string1 + strlen(long_string1);
+    const char* long_string2 = "Another string too long for short string";
+    const char* long_string2_end = long_string2 + strlen(long_string2);
 
-    std::vector<uint8_t> byte_string = { 'H','e','l','l','o' };
+    std::vector<uint8_t> byte_string1 = { 'H','e','l','l','o' };
 
     SECTION("long string copy constructor")
     {
-        pmr_json j1{long_string, alloc1};
+        jsoncons::pmr::json j1{long_string1, alloc1};
         REQUIRE(&pool1 == j1.get_allocator().resource()); 
-        auto it = std::search(buffer1, last1, long_string, long_string_end);
+        auto it = std::search(buffer1, last1, long_string1, long_string1_end);
         CHECK(it != last1);
 
-        pmr_json j2{j1};
+        jsoncons::pmr::json j2{j1};
         REQUIRE_FALSE(&pool1 == j2.get_allocator().resource()); 
 
-        pmr_json j3{j1, alloc2};
+        jsoncons::pmr::json j3{j1, alloc2};
         REQUIRE(&pool2 == j3.get_allocator().resource()); 
-        it = std::search(buffer2, last2, long_string, long_string_end);
+        it = std::search(buffer2, last2, long_string1, long_string1_end);
         CHECK(it != last1);
     }
 
     SECTION("long string move constructor")
     {
-        pmr_json j1{long_string, alloc1};
+        jsoncons::pmr::json j1{long_string1, alloc1};
         REQUIRE(&pool1 == j1.get_allocator().resource()); 
-        auto it = std::search(buffer1, last1, long_string, long_string_end);
+        auto it = std::search(buffer1, last1, long_string1, long_string1_end);
         CHECK(it != last1);
 
-        pmr_json j2{std::move(j1)};
+        jsoncons::pmr::json j2{std::move(j1)};
         REQUIRE(&pool1 == j2.get_allocator().resource()); 
-        it = std::search(buffer1, last1, long_string, long_string_end);
+        it = std::search(buffer1, last1, long_string1, long_string1_end);
         CHECK(it != last1);
 
-        pmr_json j3{std::move(j2), alloc2};
+        jsoncons::pmr::json j3{std::move(j2), alloc2};
         REQUIRE(&pool2 == j3.get_allocator().resource()); 
-        it = std::search(buffer2, last2, long_string, long_string_end);
+        it = std::search(buffer2, last2, long_string1, long_string1_end);
         CHECK(it != last1);
     }
 
     SECTION("byte string copy constructor")
     {
-        pmr_json j1{byte_string_arg, byte_string, semantic_tag::none, alloc1};
+        jsoncons::pmr::json j1{byte_string_arg, byte_string1, semantic_tag::none, alloc1};
         REQUIRE(&pool1 == j1.get_allocator().resource()); 
-        auto it = std::search(buffer1, last1, byte_string.data(), byte_string.data()+byte_string.size());
+        auto it = std::search(buffer1, last1, byte_string1.data(), byte_string1.data()+byte_string1.size());
         CHECK(it != last1);
 
-        pmr_json j2{j1};
+        jsoncons::pmr::json j2{j1};
         REQUIRE_FALSE(&pool1 == j2.get_allocator().resource()); 
 
-        pmr_json j3{j1, alloc2};
+        jsoncons::pmr::json j3{j1, alloc2};
         REQUIRE(&pool2 == j3.get_allocator().resource()); 
-        it = std::search(buffer2, last2, long_string, long_string_end);
+        it = std::search(buffer2, last2, long_string1, long_string1_end);
         CHECK(it != last1);
     }
 
     SECTION("byte string move constructor")
     {
-        pmr_json j1{byte_string_arg, byte_string, semantic_tag::none, alloc1};
+        jsoncons::pmr::json j1{byte_string_arg, byte_string1, semantic_tag::none, alloc1};
         REQUIRE(&pool1 == j1.get_allocator().resource()); 
-        auto it = std::search(buffer1, last1, byte_string.data(), byte_string.data()+byte_string.size());
+        auto it = std::search(buffer1, last1, byte_string1.data(), byte_string1.data()+byte_string1.size());
         CHECK(it != last1);
 
-        pmr_json j2{std::move(j1)};
+        jsoncons::pmr::json j2{std::move(j1)};
         REQUIRE(&pool1 == j2.get_allocator().resource()); 
 
-        pmr_json j3{std::move(j2), alloc2};
+        jsoncons::pmr::json j3{std::move(j2), alloc2};
         REQUIRE(&pool2 == j3.get_allocator().resource()); 
-        it = std::search(buffer2, last2, long_string, long_string_end);
+        it = std::search(buffer2, last2, long_string1, long_string1_end);
         CHECK(it != last1);
     }
 
     SECTION("array copy constructor")
     {
-        pmr_json j1{jsoncons::json_array_arg, alloc1};
+        jsoncons::pmr::json j1{jsoncons::json_array_arg, alloc1};
         REQUIRE(&pool1 == j1.get_allocator().resource());
-        j1.push_back(long_string); 
-        j1.push_back(another_long_string);
-        auto it = std::search(buffer1, last1, long_string, long_string_end);
-        it = std::search(buffer1, last1, another_long_string, another_long_string_end);
+        j1.push_back(long_string1); 
+        j1.push_back(long_string2);
+        auto it = std::search(buffer1, last1, long_string1, long_string1_end);
+        it = std::search(buffer1, last1, long_string2, long_string2_end);
         CHECK(it != last1);
 
-        pmr_json j2{j1};
+        jsoncons::pmr::json j2{j1};
         REQUIRE_FALSE(&pool1 == j2.get_allocator().resource()); 
 
-        pmr_json j3{j1, alloc2};
+        jsoncons::pmr::json j3{j1, alloc2};
         REQUIRE(&pool2 == j3.get_allocator().resource()); 
-        it = std::search(buffer2, last2, long_string, long_string_end);
+        it = std::search(buffer2, last2, long_string1, long_string1_end);
         CHECK(it != last1);
     }
 
     SECTION("array move constructor")
     {
-        pmr_json j1{jsoncons::json_array_arg, alloc1};
+        jsoncons::pmr::json j1{jsoncons::json_array_arg, alloc1};
         REQUIRE(&pool1 == j1.get_allocator().resource());
-        j1.push_back(long_string); 
-        j1.push_back(another_long_string);
-        auto it = std::search(buffer1, last1, long_string, long_string_end);
-        it = std::search(buffer1, last1, another_long_string, another_long_string_end);
+        j1.push_back(long_string1); 
+        j1.push_back(long_string2);
+        auto it = std::search(buffer1, last1, long_string1, long_string1_end);
+        it = std::search(buffer1, last1, long_string2, long_string2_end);
         CHECK(it != last1);
 
-        pmr_json j2{std::move(j1)};
+        jsoncons::pmr::json j2{std::move(j1)};
         REQUIRE(&pool1 == j2.get_allocator().resource()); 
 
-        pmr_json j3{std::move(j2), alloc2};
+        jsoncons::pmr::json j3{std::move(j2), alloc2};
         REQUIRE(&pool2 == j3.get_allocator().resource()); 
-        it = std::search(buffer2, last2, long_string, long_string_end);
+        it = std::search(buffer2, last2, long_string1, long_string1_end);
         CHECK(it != last1);
     }
 
     SECTION("object copy constructor")
     {
-        pmr_json j1{jsoncons::json_object_arg, alloc1};
+        jsoncons::pmr::json j1{jsoncons::json_object_arg, alloc1};
         REQUIRE(&pool1 == j1.get_allocator().resource());
-        j1.insert_or_assign(long_key, long_string); 
-        auto it = std::search(buffer1, last1, long_string, long_string_end);
+        j1.insert_or_assign(long_key1, long_string1); 
+        auto it = std::search(buffer1, last1, long_string1, long_string1_end);
         CHECK(it != last1);
 
-        pmr_json j2{j1};
+        jsoncons::pmr::json j2{j1};
         REQUIRE_FALSE(&pool1 == j2.get_allocator().resource()); 
 
-        pmr_json j3{j1, alloc2};
+        jsoncons::pmr::json j3{j1, alloc2};
         REQUIRE(&pool2 == j3.get_allocator().resource()); 
-        it = std::search(buffer2, last2, long_key, long_key_end);
+        it = std::search(buffer2, last2, long_key1, long_key1_end);
         CHECK(it != last1);
-        it = std::search(buffer2, last2, long_string, long_string_end);
+        it = std::search(buffer2, last2, long_string1, long_string1_end);
         CHECK(it != last1);
     }
 
     SECTION("object move constructor")
     {
-        pmr_json j1{jsoncons::json_object_arg, alloc1};
+        jsoncons::pmr::json j1{jsoncons::json_object_arg, alloc1};
         REQUIRE(&pool1 == j1.get_allocator().resource());
-        j1.insert_or_assign(long_key, long_string); 
-        auto it = std::search(buffer1, last1, long_string, long_string_end);
+        j1.insert_or_assign(long_key1, long_string1); 
+        auto it = std::search(buffer1, last1, long_string1, long_string1_end);
         CHECK(it != last1);
 
-        pmr_json j2{std::move(j1)};
+        jsoncons::pmr::json j2{std::move(j1)};
         REQUIRE(&pool1 == j2.get_allocator().resource()); 
 
-        pmr_json j3{std::move(j2), alloc2};
+        jsoncons::pmr::json j3{std::move(j2), alloc2};
         REQUIRE(&pool2 == j3.get_allocator().resource()); 
-        it = std::search(buffer2, last2, long_key, long_key_end);
+        it = std::search(buffer2, last2, long_key1, long_key1_end);
         CHECK(it != last1);
-        it = std::search(buffer2, last2, long_string, long_string_end);
+        it = std::search(buffer2, last2, long_string1, long_string1_end);
         CHECK(it != last1);
     }
 
-    /*SECTION("test 2")
+    SECTION("empty object with given allocator")
     {
-        pmr_json j1{ alloc1 };
+        jsoncons::pmr::json j1{alloc1};
+        REQUIRE(j1.is_object());
+        REQUIRE(&pool1 == j1.get_allocator().resource());
+    }
 
-        const char* long_key1 = "Key too long for short string";
-        const char* long_string1 = "String too long for short string";
-        j1[long_key1] = long_string1;
-
-        char* last1 = buffer1 + sizeof(buffer1);
-        auto it = std::search(buffer1, last1, long_string1, long_string1 + strlen(long_string1));
+    SECTION("object move constructor")
+    {
+        jsoncons::pmr::json j1{jsoncons::json_object_arg, alloc1};
+        REQUIRE(&pool1 == j1.get_allocator().resource());
+        j1.insert_or_assign(long_key1, long_string1); 
+        auto it = std::search(buffer1, last1, long_string1, long_string1_end);
         CHECK(it != last1);
 
-        it = std::search(buffer1, last1, long_key1, long_key1 + strlen(long_key1));
+        jsoncons::pmr::json j2{std::move(j1)};
+        REQUIRE(&pool1 == j2.get_allocator().resource()); 
+
+        jsoncons::pmr::json j3{std::move(j2), alloc2};
+        REQUIRE(&pool2 == j3.get_allocator().resource()); 
+        it = std::search(buffer2, last2, long_key1, long_key1_end);
+        CHECK(it != last1);
+        it = std::search(buffer2, last2, long_string1, long_string1_end);
+        CHECK(it != last1);
+    }
+
+    SECTION("test 2")
+    {
+        jsoncons::pmr::json j1{ alloc1 };
+
+        j1[long_key1] = long_string1;
+
+        auto it = std::search(buffer1, last1, long_string1, long_string1_end);
+        CHECK(it != last1);
+
+        it = std::search(buffer1, last1, long_key1, long_key1_end);
         CHECK(it != last1);
     }
     SECTION("test 3")
     {
-        const char* long_string1 = "String too long for short string";
-        pmr_json j1(long_string1);
+        jsoncons::pmr::json j1(long_string1);
         
-        pmr_json j2{j1, alloc2};
+        jsoncons::pmr::json j2{j1, alloc2};
         
-        char* last2 = buffer2 + sizeof(buffer2);
-        auto it = std::search(buffer2, last2, long_string1, long_string1+strlen(long_string1));
+        auto it = std::search(buffer2, last2, long_string1, long_string1_end);
         CHECK(it != last2);
-    }*/
+    }
 }
 
 #endif
 
-#if 0
 TEST_CASE("json constructor byte_string_arg tests")
 {
     std::string expected_base64url = "Zm9vYmFy";
@@ -539,4 +554,3 @@ TEST_CASE("json constructor unsigned __int64 tests")
 #pragma GCC diagnostic pop
 #endif
 
-#endif
